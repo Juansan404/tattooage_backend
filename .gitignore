@@ -31,3 +31,13 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Variables de entorno - NUNCA subir credenciales
+.env
+.env.local
+application-local.properties
+application-dev.properties
+
+# Archivos de sistema Windows
+Thumbs.db
+Desktop.ini
