@@ -6,6 +6,8 @@ import com.tattooage.tattooage_backend.dto.RegisterRequest;
 import com.tattooage.tattooage_backend.entity.Usuario;
 import com.tattooage.tattooage_backend.repository.UsuarioRepository;
 import com.tattooage.tattooage_backend.security.JwtUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Auth", description = "Registro e inicio de sesión de usuarios")
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -22,6 +25,7 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
+    @Operation(summary = "Registrar usuario", description = "Crea una nueva cuenta. Devuelve un JWT token y los datos del usuario.")
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
         if (usuarioRepository.existsByEmail(request.getEmail())) {
@@ -46,6 +50,7 @@ public class AuthController {
                 .body(new AuthResponse(token, usuario.getIdUsuario(), usuario.getEmail(), usuario.getRol().name()));
     }
 
+    @Operation(summary = "Iniciar sesión", description = "Autentica al usuario con email y contraseña. Devuelve un JWT token.")
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody AuthRequest request) {
         return usuarioRepository.findByEmail(request.getEmail())
