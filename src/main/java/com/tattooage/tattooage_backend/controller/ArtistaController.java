@@ -10,7 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @Tag(name = "Artistas", description = "Consulta de artistas y sus perfiles. Acceso público.")
 @RestController
@@ -46,5 +48,20 @@ public class ArtistaController {
         return perfilArtistaRepository.findByUsuarioIdUsuario(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @Operation(summary = "Actualizar perfil del artista")
+    @PutMapping("/{id}/perfil")
+    public ResponseEntity<PerfilArtista> updatePerfil(@PathVariable Integer id,
+                                                       @RequestBody Map<String, Object> datos) {
+        return perfilArtistaRepository.findByUsuarioIdUsuario(id).map(p -> {
+            if (datos.get("especialidades") != null) p.setEspecialidades(datos.get("especialidades").toString());
+            if (datos.get("anosExperiencia") != null) p.setAnosExperiencia(Integer.valueOf(datos.get("anosExperiencia").toString()));
+            if (datos.get("instagram")       != null) p.setInstagram(datos.get("instagram").toString());
+            if (datos.get("precioHora")      != null) p.setPrecioHora(new BigDecimal(datos.get("precioHora").toString()));
+            if (datos.get("disponible")      != null) p.setDisponible(Boolean.valueOf(datos.get("disponible").toString()));
+            if (datos.get("portfolioUrl")    != null) p.setPortfolioUrl(datos.get("portfolioUrl").toString());
+            return ResponseEntity.ok(perfilArtistaRepository.save(p));
+        }).orElse(ResponseEntity.notFound().build());
     }
 }

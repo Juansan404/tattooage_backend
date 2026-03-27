@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Tag(name = "Solicitudes de Cita", description = "Gestión de solicitudes de cita entre clientes y artistas. Requiere autenticación.")
 @RestController
@@ -40,14 +41,14 @@ public class SolicitudCitaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-    @Operation(summary = "Actualizar estado de solicitud", description = "Cambia el estado de una solicitud. Valores posibles: Pendiente, Aceptada, Rechazada, Completada. Se pasa como query param.")
-    @PatchMapping("/{id}/estado")
+    @Operation(summary = "Actualizar estado de solicitud")
+    @PutMapping("/{id}/estado")
     public ResponseEntity<SolicitudCita> updateEstado(
             @PathVariable Integer id,
-            @RequestParam String estado) {
+            @RequestBody Map<String, String> body) {
         return solicitudCitaRepository.findById(id)
                 .map(s -> {
-                    s.setEstado(SolicitudCita.EstadoSolicitud.valueOf(estado));
+                    s.setEstado(SolicitudCita.EstadoSolicitud.valueOf(body.get("estado")));
                     return ResponseEntity.ok(solicitudCitaRepository.save(s));
                 })
                 .orElse(ResponseEntity.notFound().build());

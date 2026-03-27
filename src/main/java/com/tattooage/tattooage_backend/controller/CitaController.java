@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Tag(name = "Citas", description = "Gestión de citas de tatuaje. Requiere autenticación.")
 @RestController
@@ -38,6 +39,33 @@ public class CitaController {
     public ResponseEntity<Cita> create(@RequestBody Cita cita) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(citaRepository.save(cita));
+    }
+
+    @Operation(summary = "Actualizar cita")
+    @PutMapping("/{id}")
+    public ResponseEntity<Cita> update(@PathVariable Integer id, @RequestBody Cita datos) {
+        return citaRepository.findById(id).map(c -> {
+            if (datos.getCliente()             != null) c.setCliente(datos.getCliente());
+            if (datos.getArtista()             != null) c.setArtista(datos.getArtista());
+            if (datos.getFechaCita()           != null) c.setFechaCita(datos.getFechaCita());
+            if (datos.getHoraInicio()          != null) c.setHoraInicio(datos.getHoraInicio());
+            if (datos.getDuracionAproximada()  != null) c.setDuracionAproximada(datos.getDuracionAproximada());
+            if (datos.getPrecio()              != null) c.setPrecio(datos.getPrecio());
+            if (datos.getEstado()              != null) c.setEstado(datos.getEstado());
+            if (datos.getSala()                != null) c.setSala(datos.getSala());
+            if (datos.getNotas()               != null) c.setNotas(datos.getNotas());
+            return ResponseEntity.ok(citaRepository.save(c));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @Operation(summary = "Cambiar estado de cita")
+    @PutMapping("/{id}/estado")
+    public ResponseEntity<Cita> updateEstado(@PathVariable Integer id,
+                                              @RequestBody Map<String, String> body) {
+        return citaRepository.findById(id).map(c -> {
+            c.setEstado(Cita.EstadoCita.valueOf(body.get("estado")));
+            return ResponseEntity.ok(citaRepository.save(c));
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Eliminar cita", description = "Elimina una cita por ID. Devuelve 204 si se elimina correctamente.")
