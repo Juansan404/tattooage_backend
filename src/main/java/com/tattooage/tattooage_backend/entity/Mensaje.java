@@ -28,7 +28,11 @@ public class Mensaje {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String contenido;
 
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean leido = false;
+
     @CreationTimestamp
-    @Column(name = "enviado_en", updatable = false)
-    private LocalDateTime enviadoEn;
+    @Column(name = "creado_en", updatable = false)
+    private LocalDateTime creadoEn;
 }
