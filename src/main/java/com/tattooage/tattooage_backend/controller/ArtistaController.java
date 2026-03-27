@@ -7,6 +7,7 @@ import com.tattooage.tattooage_backend.repository.UsuarioRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,6 +49,21 @@ public class ArtistaController {
         return perfilArtistaRepository.findByUsuarioIdUsuario(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @Operation(summary = "Crear perfil para un artista existente")
+    @PostMapping("/{id}/perfil")
+    public ResponseEntity<?> createPerfil(@PathVariable Integer id,
+                                          @RequestBody PerfilArtista datos) {
+        return usuarioRepository.findById(id).map(u -> {
+            if (perfilArtistaRepository.findByUsuarioIdUsuario(id).isPresent()) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body((Object) "El artista ya tiene un perfil");
+            }
+            datos.setUsuario(u);
+            PerfilArtista saved = perfilArtistaRepository.save(datos);
+            return ResponseEntity.status(HttpStatus.CREATED).body((Object) saved);
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Actualizar perfil del artista")

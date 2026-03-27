@@ -41,6 +41,25 @@ public class SolicitudCitaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
+    @Operation(summary = "Actualizar solicitud completa")
+    @PutMapping("/{id}")
+    public ResponseEntity<SolicitudCita> update(@PathVariable Integer id,
+                                                 @RequestBody SolicitudCita datos) {
+        return solicitudCitaRepository.findById(id).map(s -> {
+            if (datos.getCliente()          != null) s.setCliente(datos.getCliente());
+            if (datos.getArtista()          != null) s.setArtista(datos.getArtista());
+            if (datos.getDescripcion()      != null) s.setDescripcion(datos.getDescripcion());
+            if (datos.getZonaCuerpo()       != null) s.setZonaCuerpo(datos.getZonaCuerpo());
+            if (datos.getTamano()           != null) s.setTamano(datos.getTamano());
+            if (datos.getPresupuestoAprox() != null) s.setPresupuestoAprox(datos.getPresupuestoAprox());
+            if (datos.getFechaPreferida()   != null) s.setFechaPreferida(datos.getFechaPreferida());
+            if (datos.getFotoReferencia()   != null) s.setFotoReferencia(datos.getFotoReferencia());
+            if (datos.getEstado()           != null) s.setEstado(datos.getEstado());
+            if (datos.getNotasArtista()     != null) s.setNotasArtista(datos.getNotasArtista());
+            return ResponseEntity.ok(solicitudCitaRepository.save(s));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
     @Operation(summary = "Actualizar estado de solicitud")
     @PutMapping("/{id}/estado")
     public ResponseEntity<SolicitudCita> updateEstado(
@@ -52,5 +71,13 @@ public class SolicitudCitaController {
                     return ResponseEntity.ok(solicitudCitaRepository.save(s));
                 })
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @Operation(summary = "Eliminar solicitud")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        if (!solicitudCitaRepository.existsById(id)) return ResponseEntity.notFound().build();
+        solicitudCitaRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }
