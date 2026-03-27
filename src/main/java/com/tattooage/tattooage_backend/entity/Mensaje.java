@@ -17,11 +17,11 @@ public class Mensaje {
     @Column(name = "id_mensaje")
     private Integer idMensaje;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_solicitud", nullable = false)
     private SolicitudCita solicitud;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_remitente", nullable = false)
     private Usuario remitente;
 

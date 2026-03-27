@@ -24,14 +24,10 @@ public class ArtistaController {
     private final UsuarioRepository usuarioRepository;
     private final PerfilArtistaRepository perfilArtistaRepository;
 
-    @Operation(summary = "Listar artistas", description = "Devuelve todos los usuarios con rol ARTISTA.")
+    @Operation(summary = "Listar artistas", description = "Devuelve todos los perfiles de artista.")
     @GetMapping
-    public ResponseEntity<List<Usuario>> getAll() {
-        return ResponseEntity.ok(
-                usuarioRepository.findAll().stream()
-                        .filter(u -> u.getRol() == Usuario.RolUsuario.ARTISTA)
-                        .toList()
-        );
+    public ResponseEntity<List<PerfilArtista>> getAll() {
+        return ResponseEntity.ok(perfilArtistaRepository.findAll());
     }
 
     @Operation(summary = "Obtener artista por ID", description = "Devuelve un artista concreto por su ID de usuario.")

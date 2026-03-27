@@ -20,11 +20,11 @@ public class SolicitudCita {
     @Column(name = "id_solicitud")
     private Integer idSolicitud;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_cliente", nullable = false)
     private Usuario cliente;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_artista", nullable = false)
     private Usuario artista;
 

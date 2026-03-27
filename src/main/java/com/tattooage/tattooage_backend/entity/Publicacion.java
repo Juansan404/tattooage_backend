@@ -18,7 +18,7 @@ public class Publicacion {
     @Column(name = "id_publicacion")
     private Integer idPublicacion;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 
