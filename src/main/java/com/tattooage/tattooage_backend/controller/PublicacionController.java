@@ -1,13 +1,17 @@
 package com.tattooage.tattooage_backend.controller;
 
+import com.tattooage.tattooage_backend.entity.Like;
 import com.tattooage.tattooage_backend.entity.Publicacion;
+import com.tattooage.tattooage_backend.entity.Usuario;
+import com.tattooage.tattooage_backend.repository.LikeRepository;
 import com.tattooage.tattooage_backend.repository.PublicacionRepository;
+import com.tattooage.tattooage_backend.repository.UsuarioRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +24,8 @@ import java.util.Map;
 public class PublicacionController {
 
     private final PublicacionRepository publicacionRepository;
+    private final LikeRepository likeRepository;
+    private final UsuarioRepository usuarioRepository;
 
     @Operation(summary = "Listar publicaciones", description = "Devuelve todas las publicaciones. Acceso público.")
     @GetMapping
@@ -61,5 +67,45 @@ public class PublicacionController {
         }
         publicacionRepository.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Toggle like", description = "Da o quita like a una publicación. Devuelve el estado actualizado.")
+    @PostMapping("/{id}/like")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> toggleLike(
+            @PathVariable Integer id,
+            @RequestBody Map<String, Integer> body) {
+
+        Integer idUsuario = body.get("idUsuario");
+        if (idUsuario == null) return ResponseEntity.badRequest().build();
+
+        Publicacion publicacion = publicacionRepository.findById(id).orElse(null);
+        Usuario usuario = usuarioRepository.findById(idUsuario).orElse(null);
+        if (publicacion == null || usuario == null) return ResponseEntity.notFound().build();
+
+        boolean yaLiked = likeRepository.existsByPublicacionIdPublicacionAndUsuarioIdUsuario(id, idUsuario);
+
+        if (yaLiked) {
+            likeRepository.deleteByPublicacionIdPublicacionAndUsuarioIdUsuario(id, idUsuario);
+            if (publicacion.getLikesCount() > 0) publicacion.setLikesCount(publicacion.getLikesCount() - 1);
+        } else {
+            likeRepository.save(Like.builder().publicacion(publicacion).usuario(usuario).build());
+            publicacion.setLikesCount(publicacion.getLikesCount() + 1);
+        }
+        publicacionRepository.save(publicacion);
+
+        long count = likeRepository.countByPublicacionIdPublicacion(id);
+        return ResponseEntity.ok(Map.of("liked", !yaLiked, "likesCount", count));
+    }
+
+    @Operation(summary = "Comprobar si el usuario ha dado like")
+    @GetMapping("/{id}/like/{idUsuario}")
+    public ResponseEntity<Map<String, Object>> getLikeStatus(
+            @PathVariable Integer id,
+            @PathVariable Integer idUsuario) {
+
+        boolean liked = likeRepository.existsByPublicacionIdPublicacionAndUsuarioIdUsuario(id, idUsuario);
+        long count = likeRepository.countByPublicacionIdPublicacion(id);
+        return ResponseEntity.ok(Map.of("liked", liked, "likesCount", count));
     }
 }
