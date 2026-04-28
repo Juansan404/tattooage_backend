@@ -22,7 +22,7 @@ public class Publicacion {
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 
-    @Column(name = "foto_url", nullable = false)
+    @Column(name = "foto_url", nullable = false, columnDefinition = "TEXT")
     private String fotoUrl;
 
     @Column(columnDefinition = "TEXT")

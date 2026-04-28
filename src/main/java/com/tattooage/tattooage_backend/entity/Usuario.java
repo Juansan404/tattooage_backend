@@ -39,6 +39,7 @@ public class Usuario {
     @Column(name = "fecha_nacimiento")
     private LocalDate fechaNacimiento;
 
+    @Column(columnDefinition = "TEXT")
     private String avatar;
 
     @Column(columnDefinition = "TEXT")
