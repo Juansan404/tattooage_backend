@@ -39,6 +39,8 @@ public class UsuarioController {
             if (datos.getNombre()    != null) u.setNombre(datos.getNombre());
             if (datos.getApellidos() != null) u.setApellidos(datos.getApellidos());
             if (datos.getTelefono()  != null) u.setTelefono(datos.getTelefono());
+            if (datos.getBio()       != null) u.setBio(datos.getBio());
+            if (datos.getAvatar()    != null) u.setAvatar(datos.getAvatar());
             if (datos.getRol()       != null) u.setRol(datos.getRol());
             if (datos.getActivo()    != null) u.setActivo(datos.getActivo());
             return ResponseEntity.ok(usuarioRepository.save(u));
