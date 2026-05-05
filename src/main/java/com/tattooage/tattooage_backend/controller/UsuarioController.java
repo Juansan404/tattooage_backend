@@ -24,6 +24,14 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioRepository.findAll());
     }
 
+    @Operation(summary = "Buscar usuarios por nombre o apellidos")
+    @GetMapping("/buscar")
+    public ResponseEntity<List<Usuario>> buscar(@RequestParam String nombre) {
+        return ResponseEntity.ok(
+            usuarioRepository.findByNombreContainingIgnoreCaseOrApellidosContainingIgnoreCase(nombre, nombre)
+        );
+    }
+
     @Operation(summary = "Obtener usuario por ID")
     @GetMapping("/{id}")
     public ResponseEntity<Usuario> getById(@PathVariable Integer id) {
