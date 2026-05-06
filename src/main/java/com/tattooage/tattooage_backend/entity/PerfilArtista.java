@@ -5,6 +5,8 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "perfiles_artista")
@@ -48,4 +50,13 @@ public class PerfilArtista {
     @CreationTimestamp
     @Column(name = "creado_en", updatable = false)
     private LocalDateTime creadoEn;
+
+    @Builder.Default
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "artista_estilos",
+        joinColumns = @JoinColumn(name = "id_perfil"),
+        inverseJoinColumns = @JoinColumn(name = "id_estilo")
+    )
+    private List<Estilo> estilos = new ArrayList<>();
 }

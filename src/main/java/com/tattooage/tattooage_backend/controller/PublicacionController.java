@@ -1,9 +1,11 @@
 package com.tattooage.tattooage_backend.controller;
 
+import com.tattooage.tattooage_backend.entity.Estilo;
 import com.tattooage.tattooage_backend.entity.Like;
 import com.tattooage.tattooage_backend.entity.Notificacion;
 import com.tattooage.tattooage_backend.entity.Publicacion;
 import com.tattooage.tattooage_backend.entity.Usuario;
+import com.tattooage.tattooage_backend.repository.EstiloRepository;
 import com.tattooage.tattooage_backend.repository.LikeRepository;
 import com.tattooage.tattooage_backend.repository.NotificacionRepository;
 import com.tattooage.tattooage_backend.repository.PublicacionRepository;
@@ -19,8 +21,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Tag(name = "Publicaciones", description = "Gestión de publicaciones de tatuajes")
 @RestController
@@ -32,6 +36,7 @@ public class PublicacionController {
     private final LikeRepository likeRepository;
     private final UsuarioRepository usuarioRepository;
     private final NotificacionRepository notificacionRepository;
+    private final EstiloRepository estiloRepository;
 
     @Operation(summary = "Listar publicaciones",
                description = "Sin parámetros devuelve todas. Con ?page=0&size=15 devuelve Page<Publicacion> paginado, ordenado por fecha desc.")
@@ -60,8 +65,35 @@ public class PublicacionController {
 
     @Operation(summary = "Crear publicación")
     @PostMapping
-    public ResponseEntity<Publicacion> create(@RequestBody Publicacion publicacion) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(publicacionRepository.save(publicacion));
+    @Transactional
+    public ResponseEntity<Publicacion> create(@RequestBody Map<String, Object> body) {
+        Publicacion pub = new Publicacion();
+
+        if (body.get("usuario") instanceof Map) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> u = (Map<String, Object>) body.get("usuario");
+            if (u.get("idUsuario") instanceof Integer id) {
+                pub.setUsuario(usuarioRepository.findById(id).orElseThrow());
+            }
+        }
+        if (body.get("fotoUrl") != null)    pub.setFotoUrl(body.get("fotoUrl").toString());
+        if (body.get("descripcion") != null) pub.setDescripcion(body.get("descripcion").toString());
+        if (body.get("zonaCuerpo") != null)  pub.setZonaCuerpo(body.get("zonaCuerpo").toString());
+        if (body.get("estilo") != null)      pub.setEstilo(body.get("estilo").toString());
+
+        if (body.get("estilos") instanceof List) {
+            @SuppressWarnings("unchecked")
+            List<String> nombres = (List<String>) body.get("estilos");
+            List<Estilo> estilosEntidades = nombres.stream()
+                .filter(n -> n != null && !n.isBlank())
+                .map(n -> estiloRepository.findByNombreIgnoreCase(n.trim())
+                    .orElseGet(() -> estiloRepository.save(
+                        Estilo.builder().nombre(n.trim().toLowerCase()).build())))
+                .collect(Collectors.toList());
+            pub.setEstilos(estilosEntidades);
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(publicacionRepository.save(pub));
     }
 
     @Operation(summary = "Actualizar publicación")

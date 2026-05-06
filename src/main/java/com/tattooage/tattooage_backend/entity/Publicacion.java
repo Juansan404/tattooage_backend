@@ -5,6 +5,8 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "publicaciones")
@@ -45,4 +47,13 @@ public class Publicacion {
     @UpdateTimestamp
     @Column(name = "actualizado_en")
     private LocalDateTime actualizadoEn;
+
+    @Builder.Default
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "publicacion_estilos",
+        joinColumns = @JoinColumn(name = "id_publicacion"),
+        inverseJoinColumns = @JoinColumn(name = "id_estilo")
+    )
+    private List<Estilo> estilos = new ArrayList<>();
 }
