@@ -1,7 +1,9 @@
 package com.tattooage.tattooage_backend.controller;
 
+import com.tattooage.tattooage_backend.entity.Notificacion;
 import com.tattooage.tattooage_backend.entity.Seguidor;
 import com.tattooage.tattooage_backend.entity.Usuario;
+import com.tattooage.tattooage_backend.repository.NotificacionRepository;
 import com.tattooage.tattooage_backend.repository.SeguidorRepository;
 import com.tattooage.tattooage_backend.repository.UsuarioRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,6 +23,7 @@ public class SeguidorController {
 
     private final SeguidorRepository seguidorRepository;
     private final UsuarioRepository usuarioRepository;
+    private final NotificacionRepository notificacionRepository;
 
     @Operation(summary = "Toggle seguir/dejar de seguir a un usuario")
     @PostMapping("/{idSeguido}/seguir")
@@ -42,6 +45,11 @@ public class SeguidorController {
             seguidorRepository.deleteBySeguidorIdUsuarioAndSeguidoIdUsuario(idSeguidor, idSeguido);
         } else {
             seguidorRepository.save(Seguidor.builder().seguidor(seguidor).seguido(seguido).build());
+            notificacionRepository.save(Notificacion.builder()
+                    .receptor(seguido)
+                    .emisor(seguidor)
+                    .tipo(Notificacion.TipoNotificacion.SEGUIDOR)
+                    .build());
         }
 
         long seguidores = seguidorRepository.countBySeguidoIdUsuario(idSeguido);

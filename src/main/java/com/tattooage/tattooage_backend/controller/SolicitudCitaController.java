@@ -1,7 +1,10 @@
 package com.tattooage.tattooage_backend.controller;
 
+import com.tattooage.tattooage_backend.entity.Notificacion;
 import com.tattooage.tattooage_backend.entity.SolicitudCita;
+import com.tattooage.tattooage_backend.repository.NotificacionRepository;
 import com.tattooage.tattooage_backend.repository.SolicitudCitaRepository;
+import com.tattooage.tattooage_backend.repository.UsuarioRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,8 @@ import java.util.Map;
 public class SolicitudCitaController {
 
     private final SolicitudCitaRepository solicitudCitaRepository;
+    private final NotificacionRepository notificacionRepository;
+    private final UsuarioRepository usuarioRepository;
 
     @Operation(summary = "Listar solicitudes", description = "Devuelve todas las solicitudes de cita.")
     @GetMapping
@@ -38,6 +43,18 @@ public class SolicitudCitaController {
     @PostMapping
     public ResponseEntity<SolicitudCita> create(@RequestBody SolicitudCita solicitud) {
         SolicitudCita saved = solicitudCitaRepository.save(solicitud);
+        try {
+            Integer idArtista = saved.getArtista().getIdUsuario();
+            Integer idCliente = saved.getCliente().getIdUsuario();
+            if (idArtista != null && idCliente != null && !idArtista.equals(idCliente)) {
+                notificacionRepository.save(Notificacion.builder()
+                        .receptor(usuarioRepository.getReferenceById(idArtista))
+                        .emisor(usuarioRepository.getReferenceById(idCliente))
+                        .tipo(Notificacion.TipoNotificacion.SOLICITUD)
+                        .idReferencia(saved.getIdSolicitud())
+                        .build());
+            }
+        } catch (Exception ignored) {}
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 

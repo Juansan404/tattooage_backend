@@ -1,7 +1,10 @@
 package com.tattooage.tattooage_backend.controller;
 
 import com.tattooage.tattooage_backend.entity.Comentario;
+import com.tattooage.tattooage_backend.entity.Notificacion;
 import com.tattooage.tattooage_backend.repository.ComentarioRepository;
+import com.tattooage.tattooage_backend.repository.NotificacionRepository;
+import com.tattooage.tattooage_backend.repository.PublicacionRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +21,8 @@ import java.util.List;
 public class ComentarioController {
 
     private final ComentarioRepository comentarioRepository;
+    private final PublicacionRepository publicacionRepository;
+    private final NotificacionRepository notificacionRepository;
 
     @Operation(summary = "Listar todos los comentarios")
     @GetMapping
@@ -42,7 +47,22 @@ public class ComentarioController {
     @Operation(summary = "Crear comentario")
     @PostMapping
     public ResponseEntity<Comentario> create(@RequestBody Comentario comentario) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(comentarioRepository.save(comentario));
+        Comentario saved = comentarioRepository.save(comentario);
+        try {
+            Integer idPub = saved.getPublicacion().getIdPublicacion();
+            Integer idComentador = saved.getUsuario().getIdUsuario();
+            publicacionRepository.findById(idPub).ifPresent(pub -> {
+                if (pub.getUsuario() != null && !pub.getUsuario().getIdUsuario().equals(idComentador)) {
+                    notificacionRepository.save(Notificacion.builder()
+                            .receptor(pub.getUsuario())
+                            .emisor(saved.getUsuario())
+                            .tipo(Notificacion.TipoNotificacion.COMENTARIO)
+                            .idReferencia(idPub)
+                            .build());
+                }
+            });
+        } catch (Exception ignored) {}
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @Operation(summary = "Eliminar comentario")

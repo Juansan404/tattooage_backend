@@ -1,14 +1,19 @@
 package com.tattooage.tattooage_backend.controller;
 
 import com.tattooage.tattooage_backend.entity.Like;
+import com.tattooage.tattooage_backend.entity.Notificacion;
 import com.tattooage.tattooage_backend.entity.Publicacion;
 import com.tattooage.tattooage_backend.entity.Usuario;
 import com.tattooage.tattooage_backend.repository.LikeRepository;
+import com.tattooage.tattooage_backend.repository.NotificacionRepository;
 import com.tattooage.tattooage_backend.repository.PublicacionRepository;
 import com.tattooage.tattooage_backend.repository.UsuarioRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,11 +31,23 @@ public class PublicacionController {
     private final PublicacionRepository publicacionRepository;
     private final LikeRepository likeRepository;
     private final UsuarioRepository usuarioRepository;
+    private final NotificacionRepository notificacionRepository;
 
-    @Operation(summary = "Listar publicaciones", description = "Devuelve todas las publicaciones. Acceso público.")
+    @Operation(summary = "Listar publicaciones",
+               description = "Sin parámetros devuelve todas. Con ?page=0&size=15 devuelve Page<Publicacion> paginado, ordenado por fecha desc.")
     @GetMapping
-    public ResponseEntity<List<Publicacion>> getAll() {
-        return ResponseEntity.ok(publicacionRepository.findAll());
+    public ResponseEntity<?> getAll(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(defaultValue = "15")  int size) {
+
+        if (page == null) {
+            List<Publicacion> todas = publicacionRepository.findAll(
+                    Sort.by("creadoEn").descending());
+            return ResponseEntity.ok(todas);
+        }
+        Page<Publicacion> resultado = publicacionRepository
+                .findAllByOrderByCreadoEnDesc(PageRequest.of(page, size));
+        return ResponseEntity.ok(resultado);
     }
 
     @Operation(summary = "Obtener publicación por ID", description = "Devuelve una publicación concreta. Devuelve 404 si no existe.")
@@ -85,12 +102,21 @@ public class PublicacionController {
 
         boolean yaLiked = likeRepository.existsByPublicacionIdPublicacionAndUsuarioIdUsuario(id, idUsuario);
 
+        int count = publicacion.getLikesCount() != null ? publicacion.getLikesCount() : 0;
         if (yaLiked) {
             likeRepository.deleteByPublicacionIdPublicacionAndUsuarioIdUsuario(id, idUsuario);
-            if (publicacion.getLikesCount() > 0) publicacion.setLikesCount(publicacion.getLikesCount() - 1);
+            publicacion.setLikesCount(Math.max(0, count - 1));
         } else {
             likeRepository.save(Like.builder().publicacion(publicacion).usuario(usuario).build());
-            publicacion.setLikesCount(publicacion.getLikesCount() + 1);
+            publicacion.setLikesCount(count + 1);
+            if (publicacion.getUsuario() != null && !publicacion.getUsuario().getIdUsuario().equals(idUsuario)) {
+                notificacionRepository.save(Notificacion.builder()
+                        .receptor(publicacion.getUsuario())
+                        .emisor(usuario)
+                        .tipo(Notificacion.TipoNotificacion.LIKE)
+                        .idReferencia(id)
+                        .build());
+            }
         }
         publicacionRepository.save(publicacion);
 
