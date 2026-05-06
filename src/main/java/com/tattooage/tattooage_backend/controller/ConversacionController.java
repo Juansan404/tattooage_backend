@@ -59,7 +59,8 @@ public class ConversacionController {
                     Usuario u2 = usuarioRepository.getReferenceById(idU2);
                     Conversacion nueva = Conversacion.builder()
                             .usuario1(u1).usuario2(u2).build();
-                    return ResponseEntity.ok(conversacionRepository.save(nueva));
+                    Conversacion saved = conversacionRepository.save(nueva);
+                    return ResponseEntity.ok(conversacionRepository.findById(saved.getIdConversacion()).orElse(saved));
                 });
     }
 
