@@ -102,13 +102,13 @@ public class PublicacionController {
 
         boolean yaLiked = likeRepository.existsByPublicacionIdPublicacionAndUsuarioIdUsuario(id, idUsuario);
 
-        int count = publicacion.getLikesCount() != null ? publicacion.getLikesCount() : 0;
+        int currentCount = publicacion.getLikesCount() != null ? publicacion.getLikesCount() : 0;
         if (yaLiked) {
             likeRepository.deleteByPublicacionIdPublicacionAndUsuarioIdUsuario(id, idUsuario);
-            publicacion.setLikesCount(Math.max(0, count - 1));
+            publicacion.setLikesCount(Math.max(0, currentCount - 1));
         } else {
             likeRepository.save(Like.builder().publicacion(publicacion).usuario(usuario).build());
-            publicacion.setLikesCount(count + 1);
+            publicacion.setLikesCount(currentCount + 1);
             if (publicacion.getUsuario() != null && !publicacion.getUsuario().getIdUsuario().equals(idUsuario)) {
                 notificacionRepository.save(Notificacion.builder()
                         .receptor(publicacion.getUsuario())
