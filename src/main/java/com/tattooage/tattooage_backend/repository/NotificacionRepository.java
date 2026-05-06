@@ -4,6 +4,7 @@ import com.tattooage.tattooage_backend.entity.Notificacion;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -15,5 +16,5 @@ public interface NotificacionRepository extends JpaRepository<Notificacion, Inte
 
     @Modifying
     @Query("UPDATE Notificacion n SET n.leida = true WHERE n.receptor.idUsuario = :idUsuario")
-    void marcarTodasLeidas(Integer idUsuario);
+    void marcarTodasLeidas(@Param("idUsuario") Integer idUsuario);
 }
