@@ -54,12 +54,11 @@ public class ChatWebSocketController {
         String contenido = (String) body.get("contenido");
 
         MensajeDirecto msg = MensajeDirecto.builder()
-                .conversacion(conversacionRepository.getReferenceById(convId))
+                .conversacion(conversacionRepository.findById(convId).orElseThrow())
                 .remitente(usuarioRepository.findById(idRemitente).orElseThrow())
                 .contenido(contenido)
                 .build();
 
-        MensajeDirecto saved = mensajeDirectoRepository.save(msg);
-        return mensajeDirectoRepository.findById(saved.getIdMensaje()).orElse(saved);
+        return mensajeDirectoRepository.save(msg);
     }
 }

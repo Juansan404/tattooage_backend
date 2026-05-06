@@ -1,5 +1,6 @@
 package com.tattooage.tattooage_backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -17,6 +18,7 @@ public class MensajeDirecto {
     @Column(name = "id_mensaje")
     private Integer idMensaje;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_conversacion", nullable = false)
     private Conversacion conversacion;

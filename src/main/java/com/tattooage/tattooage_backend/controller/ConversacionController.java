@@ -86,12 +86,11 @@ public class ConversacionController {
         Integer idRemitente = (Integer) body.get("idRemitente");
         String contenido = (String) body.get("contenido");
 
-        Conversacion conv = conversacionRepository.getReferenceById(id);
-        Usuario remitente = usuarioRepository.getReferenceById(idRemitente);
+        Conversacion conv = conversacionRepository.findById(id).orElseThrow();
+        Usuario remitente = usuarioRepository.findById(idRemitente).orElseThrow();
         MensajeDirecto msg = MensajeDirecto.builder()
                 .conversacion(conv).remitente(remitente).contenido(contenido).build();
-        MensajeDirecto saved = mensajeDirectoRepository.save(msg);
-        return ResponseEntity.ok(mensajeDirectoRepository.findById(saved.getIdMensaje()).orElse(saved));
+        return ResponseEntity.ok(mensajeDirectoRepository.save(msg));
     }
 
     @Operation(summary = "Contar mensajes no leídos del usuario en todas sus conversaciones")
