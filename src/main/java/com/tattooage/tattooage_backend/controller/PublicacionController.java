@@ -4,10 +4,12 @@ import com.tattooage.tattooage_backend.entity.Estilo;
 import com.tattooage.tattooage_backend.entity.Like;
 import com.tattooage.tattooage_backend.entity.Notificacion;
 import com.tattooage.tattooage_backend.entity.Publicacion;
+import com.tattooage.tattooage_backend.entity.PublicacionGuardada;
 import com.tattooage.tattooage_backend.entity.Usuario;
 import com.tattooage.tattooage_backend.repository.EstiloRepository;
 import com.tattooage.tattooage_backend.repository.LikeRepository;
 import com.tattooage.tattooage_backend.repository.NotificacionRepository;
+import com.tattooage.tattooage_backend.repository.PublicacionGuardadaRepository;
 import com.tattooage.tattooage_backend.repository.PublicacionRepository;
 import com.tattooage.tattooage_backend.repository.UsuarioRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,6 +36,7 @@ public class PublicacionController {
 
     private final PublicacionRepository publicacionRepository;
     private final LikeRepository likeRepository;
+    private final PublicacionGuardadaRepository guardadaRepository;
     private final UsuarioRepository usuarioRepository;
     private final NotificacionRepository notificacionRepository;
     private final EstiloRepository estiloRepository;
@@ -171,5 +174,44 @@ public class PublicacionController {
         boolean liked = likeRepository.existsByPublicacionIdPublicacionAndUsuarioIdUsuario(id, idUsuario);
         long count = likeRepository.countByPublicacionIdPublicacion(id);
         return ResponseEntity.ok(Map.of("liked", liked, "likesCount", count));
+    }
+
+    @Operation(summary = "Toggle guardar publicación")
+    @PostMapping("/{id}/guardar")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> toggleGuardar(
+            @PathVariable Integer id,
+            @RequestBody Map<String, Integer> body) {
+
+        Integer idUsuario = body.get("idUsuario");
+        if (idUsuario == null) return ResponseEntity.badRequest().build();
+
+        Publicacion publicacion = publicacionRepository.findById(id).orElse(null);
+        Usuario usuario = usuarioRepository.findById(idUsuario).orElse(null);
+        if (publicacion == null || usuario == null) return ResponseEntity.notFound().build();
+
+        boolean yaGuardado = guardadaRepository.existsByPublicacionIdPublicacionAndUsuarioIdUsuario(id, idUsuario);
+        if (yaGuardado) {
+            guardadaRepository.deleteByPublicacionIdPublicacionAndUsuarioIdUsuario(id, idUsuario);
+        } else {
+            guardadaRepository.save(PublicacionGuardada.builder().publicacion(publicacion).usuario(usuario).build());
+        }
+        return ResponseEntity.ok(Map.of("guardado", !yaGuardado));
+    }
+
+    @Operation(summary = "Estado de guardado de una publicación para un usuario")
+    @GetMapping("/{id}/guardado/{idUsuario}")
+    public ResponseEntity<Map<String, Object>> getGuardadoStatus(
+            @PathVariable Integer id,
+            @PathVariable Integer idUsuario) {
+
+        boolean guardado = guardadaRepository.existsByPublicacionIdPublicacionAndUsuarioIdUsuario(id, idUsuario);
+        return ResponseEntity.ok(Map.of("guardado", guardado));
+    }
+
+    @Operation(summary = "Publicaciones guardadas por un usuario")
+    @GetMapping("/guardadas/{idUsuario}")
+    public ResponseEntity<List<Publicacion>> getGuardadas(@PathVariable Integer idUsuario) {
+        return ResponseEntity.ok(guardadaRepository.findPublicacionesByUsuarioId(idUsuario));
     }
 }
