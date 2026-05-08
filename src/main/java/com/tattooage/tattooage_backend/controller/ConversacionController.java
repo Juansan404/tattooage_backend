@@ -48,6 +48,7 @@ public class ConversacionController {
 
     @Operation(summary = "Obtener o crear conversación entre dos usuarios")
     @PostMapping("/find-or-create")
+    @Transactional
     public ResponseEntity<Conversacion> findOrCreate(@RequestBody Map<String, Integer> body) {
         Integer idU1 = body.get("idUsuario1");
         Integer idU2 = body.get("idUsuario2");

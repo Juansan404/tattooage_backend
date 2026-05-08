@@ -36,6 +36,12 @@ public class ComentarioController {
         return ResponseEntity.ok(comentarioRepository.findByPublicacionIdPublicacion(idPublicacion));
     }
 
+    @Operation(summary = "Contar comentarios de una publicación")
+    @GetMapping("/publicacion/{idPublicacion}/count")
+    public ResponseEntity<Long> countByPublicacion(@PathVariable Integer idPublicacion) {
+        return ResponseEntity.ok(comentarioRepository.countByPublicacionIdPublicacion(idPublicacion));
+    }
+
     @Operation(summary = "Obtener comentario por ID")
     @GetMapping("/{id}")
     public ResponseEntity<Comentario> getById(@PathVariable Integer id) {

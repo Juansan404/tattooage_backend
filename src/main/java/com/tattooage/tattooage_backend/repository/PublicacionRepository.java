@@ -11,4 +11,5 @@ public interface PublicacionRepository extends JpaRepository<Publicacion, Intege
     Page<Publicacion> findAllByOrderByCreadoEnDesc(Pageable pageable);
     Page<Publicacion> findByUsuarioIdUsuarioOrderByCreadoEnDesc(Integer idUsuario, Pageable pageable);
     Page<Publicacion> findByEstiloIgnoreCaseOrderByCreadoEnDesc(String estilo, Pageable pageable);
+    long countByUsuarioIdUsuario(Integer idUsuario);
 }

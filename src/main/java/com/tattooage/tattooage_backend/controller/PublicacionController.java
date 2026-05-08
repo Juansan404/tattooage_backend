@@ -55,6 +55,12 @@ public class PublicacionController {
         return ResponseEntity.ok(resultado);
     }
 
+    @Operation(summary = "Número de publicaciones de un usuario")
+    @GetMapping("/count/usuario/{idUsuario}")
+    public ResponseEntity<Long> countByUsuario(@PathVariable Integer idUsuario) {
+        return ResponseEntity.ok(publicacionRepository.countByUsuarioIdUsuario(idUsuario));
+    }
+
     @Operation(summary = "Obtener publicación por ID", description = "Devuelve una publicación concreta. Devuelve 404 si no existe.")
     @GetMapping("/{id}")
     public ResponseEntity<Publicacion> getById(@PathVariable Integer id) {
