@@ -26,6 +26,18 @@ public class CitaController {
         return ResponseEntity.ok(citaRepository.findAll());
     }
 
+    @Operation(summary = "Listar citas de un cliente")
+    @GetMapping("/cliente/{idUsuario}")
+    public ResponseEntity<List<Cita>> getByCliente(@PathVariable Integer idUsuario) {
+        return ResponseEntity.ok(citaRepository.findByClienteIdUsuario(idUsuario));
+    }
+
+    @Operation(summary = "Listar citas de un artista")
+    @GetMapping("/artista/{idUsuario}")
+    public ResponseEntity<List<Cita>> getByArtista(@PathVariable Integer idUsuario) {
+        return ResponseEntity.ok(citaRepository.findByArtistaIdUsuario(idUsuario));
+    }
+
     @Operation(summary = "Obtener cita por ID", description = "Devuelve una cita concreta. Devuelve 404 si no existe.")
     @GetMapping("/{id}")
     public ResponseEntity<Cita> getById(@PathVariable Integer id) {

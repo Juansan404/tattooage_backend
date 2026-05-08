@@ -31,6 +31,18 @@ public class SolicitudCitaController {
         return ResponseEntity.ok(solicitudCitaRepository.findAll());
     }
 
+    @Operation(summary = "Listar solicitudes de un cliente")
+    @GetMapping("/cliente/{idUsuario}")
+    public ResponseEntity<List<SolicitudCita>> getByCliente(@PathVariable Integer idUsuario) {
+        return ResponseEntity.ok(solicitudCitaRepository.findByClienteIdUsuario(idUsuario));
+    }
+
+    @Operation(summary = "Listar solicitudes recibidas por un artista")
+    @GetMapping("/artista/{idUsuario}")
+    public ResponseEntity<List<SolicitudCita>> getByArtista(@PathVariable Integer idUsuario) {
+        return ResponseEntity.ok(solicitudCitaRepository.findByArtistaIdUsuario(idUsuario));
+    }
+
     @Operation(summary = "Obtener solicitud por ID", description = "Devuelve una solicitud concreta. Devuelve 404 si no existe.")
     @GetMapping("/{id}")
     public ResponseEntity<SolicitudCita> getById(@PathVariable Integer id) {
