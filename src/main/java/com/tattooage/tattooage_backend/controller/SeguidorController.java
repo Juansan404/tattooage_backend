@@ -6,6 +6,8 @@ import com.tattooage.tattooage_backend.entity.Usuario;
 import com.tattooage.tattooage_backend.repository.NotificacionRepository;
 import com.tattooage.tattooage_backend.repository.SeguidorRepository;
 import com.tattooage.tattooage_backend.repository.UsuarioRepository;
+
+import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -74,5 +76,17 @@ public class SeguidorController {
         long seguidores = seguidorRepository.countBySeguidoIdUsuario(id);
         long seguidos   = seguidorRepository.countBySeguidorIdUsuario(id);
         return ResponseEntity.ok(Map.of("seguidores", seguidores, "seguidos", seguidos));
+    }
+
+    @Operation(summary = "Lista de usuarios que siguen a este usuario")
+    @GetMapping("/{id}/seguidores")
+    public ResponseEntity<List<Usuario>> getSeguidores(@PathVariable Integer id) {
+        return ResponseEntity.ok(seguidorRepository.findSeguidoresBySeguidoId(id));
+    }
+
+    @Operation(summary = "Lista de usuarios a los que sigue este usuario")
+    @GetMapping("/{id}/seguidos")
+    public ResponseEntity<List<Usuario>> getSeguidos(@PathVariable Integer id) {
+        return ResponseEntity.ok(seguidorRepository.findSeguidosBySeguidorId(id));
     }
 }
