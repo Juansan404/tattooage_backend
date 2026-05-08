@@ -7,6 +7,7 @@ import com.tattooage.tattooage_backend.repository.NotificacionRepository;
 import com.tattooage.tattooage_backend.repository.SeguidorRepository;
 import com.tattooage.tattooage_backend.repository.UsuarioRepository;
 
+import java.util.HashMap;
 import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -68,6 +69,20 @@ public class SeguidorController {
         long seguidores   = seguidorRepository.countBySeguidoIdUsuario(idSeguido);
         long seguidos     = seguidorRepository.countBySeguidorIdUsuario(idSeguido);
         return ResponseEntity.ok(Map.of("siguiendo", siguiendo, "seguidores", seguidores, "seguidos", seguidos));
+    }
+
+    @Operation(summary = "Contadores de todos los usuarios en una sola consulta (bulk)")
+    @GetMapping("/contadores")
+    public ResponseEntity<Map<Integer, Map<String, Long>>> getContadoresBulk() {
+        Map<Integer, Long> segMap = new HashMap<>();
+        Map<Integer, Long> sigMap = new HashMap<>();
+        seguidorRepository.countSeguidoresGrouped().forEach(r -> segMap.put((Integer) r[0], (Long) r[1]));
+        seguidorRepository.countSeguidosGrouped().forEach(r -> sigMap.put((Integer) r[0], (Long) r[1]));
+
+        Map<Integer, Map<String, Long>> result = new HashMap<>();
+        segMap.forEach((id, c) -> result.computeIfAbsent(id, k -> new HashMap<>()).put("seguidores", c));
+        sigMap.forEach((id, c) -> result.computeIfAbsent(id, k -> new HashMap<>()).put("seguidos", c));
+        return ResponseEntity.ok(result);
     }
 
     @Operation(summary = "Obtener contadores de un usuario")

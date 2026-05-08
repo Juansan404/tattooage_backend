@@ -25,4 +25,10 @@ public interface SeguidorRepository extends JpaRepository<Seguidor, Integer> {
 
     @Query("SELECT s.seguido FROM Seguidor s WHERE s.seguidor.idUsuario = :id")
     List<Usuario> findSeguidosBySeguidorId(@Param("id") Integer idSeguidor);
+
+    @Query("SELECT s.seguido.idUsuario, COUNT(s) FROM Seguidor s GROUP BY s.seguido.idUsuario")
+    List<Object[]> countSeguidoresGrouped();
+
+    @Query("SELECT s.seguidor.idUsuario, COUNT(s) FROM Seguidor s GROUP BY s.seguidor.idUsuario")
+    List<Object[]> countSeguidosGrouped();
 }
