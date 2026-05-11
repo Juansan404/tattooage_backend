@@ -54,6 +54,12 @@ public class SolicitudCitaController {
     @Operation(summary = "Crear solicitud", description = "Crea una nueva solicitud de cita. El estado inicial es Pendiente.")
     @PostMapping
     public ResponseEntity<SolicitudCita> create(@RequestBody SolicitudCita solicitud) {
+        if (solicitud.getCliente() != null && solicitud.getCliente().getIdUsuario() != null) {
+            solicitud.setCliente(usuarioRepository.getReferenceById(solicitud.getCliente().getIdUsuario()));
+        }
+        if (solicitud.getArtista() != null && solicitud.getArtista().getIdUsuario() != null) {
+            solicitud.setArtista(usuarioRepository.getReferenceById(solicitud.getArtista().getIdUsuario()));
+        }
         SolicitudCita saved = solicitudCitaRepository.save(solicitud);
         try {
             Integer idArtista = saved.getArtista().getIdUsuario();
