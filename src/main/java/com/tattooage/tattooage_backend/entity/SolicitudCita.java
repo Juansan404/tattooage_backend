@@ -48,7 +48,7 @@ public class SolicitudCita {
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
-    @Column(length = 20)
+    @Column(length = 20, columnDefinition = "VARCHAR(20)")
     private EstadoSolicitud estado = EstadoSolicitud.Pendiente;
 
     @Column(name = "notas_artista", columnDefinition = "TEXT")
