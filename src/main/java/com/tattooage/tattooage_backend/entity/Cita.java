@@ -43,7 +43,7 @@ public class Cita {
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
-    @Column(length = 20)
+    @Column(length = 20, columnDefinition = "VARCHAR(20)")
     private EstadoCita estado = EstadoCita.Pendiente;
 
     @Column(length = 50)

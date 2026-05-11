@@ -2,6 +2,7 @@ package com.tattooage.tattooage_backend.controller;
 
 import com.tattooage.tattooage_backend.entity.Cita;
 import com.tattooage.tattooage_backend.repository.CitaRepository;
+import com.tattooage.tattooage_backend.repository.UsuarioRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import java.util.Map;
 public class CitaController {
 
     private final CitaRepository citaRepository;
+    private final UsuarioRepository usuarioRepository;
 
     @Operation(summary = "Listar citas", description = "Devuelve todas las citas registradas.")
     @GetMapping
@@ -49,8 +51,15 @@ public class CitaController {
     @Operation(summary = "Crear cita", description = "Crea una nueva cita de tatuaje. Devuelve 201 con la cita creada.")
     @PostMapping
     public ResponseEntity<Cita> create(@RequestBody Cita cita) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(citaRepository.save(cita));
+        if (cita.getCliente() != null && cita.getCliente().getIdUsuario() != null) {
+            cita.setCliente(usuarioRepository.getReferenceById(cita.getCliente().getIdUsuario()));
+        }
+        if (cita.getArtista() != null && cita.getArtista().getIdUsuario() != null) {
+            cita.setArtista(usuarioRepository.getReferenceById(cita.getArtista().getIdUsuario()));
+        }
+        Cita saved = citaRepository.save(cita);
+        Cita response = citaRepository.findById(saved.getIdCita()).orElse(saved);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Operation(summary = "Actualizar cita")
