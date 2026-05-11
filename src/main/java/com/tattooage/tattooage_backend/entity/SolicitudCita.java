@@ -43,7 +43,7 @@ public class SolicitudCita {
     @Column(name = "fecha_preferida")
     private LocalDate fechaPreferida;
 
-    @Column(name = "foto_referencia")
+    @Column(name = "foto_referencia", columnDefinition = "TEXT")
     private String fotoReferencia;
 
     @Builder.Default
