@@ -62,8 +62,8 @@ public class SolicitudCitaController {
         }
         SolicitudCita saved = solicitudCitaRepository.save(solicitud);
         try {
-            Integer idArtista = saved.getArtista().getIdUsuario();
-            Integer idCliente = saved.getCliente().getIdUsuario();
+            Integer idArtista = solicitud.getArtista().getIdUsuario();
+            Integer idCliente = solicitud.getCliente().getIdUsuario();
             if (idArtista != null && idCliente != null && !idArtista.equals(idCliente)) {
                 notificacionRepository.save(Notificacion.builder()
                         .receptor(usuarioRepository.getReferenceById(idArtista))
@@ -73,7 +73,8 @@ public class SolicitudCitaController {
                         .build());
             }
         } catch (Exception ignored) {}
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+        SolicitudCita response = solicitudCitaRepository.findById(saved.getIdSolicitud()).orElse(saved);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Operation(summary = "Actualizar solicitud completa")
