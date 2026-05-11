@@ -19,4 +19,9 @@ public interface MensajeDirectoRepository extends JpaRepository<MensajeDirecto, 
     @Transactional
     @Query("UPDATE MensajeDirecto m SET m.leido = true WHERE m.conversacion.idConversacion = :idConv AND m.remitente.idUsuario <> :idUsuario")
     void marcarLeidosEnConversacion(@Param("idConv") Integer idConversacion, @Param("idUsuario") Integer idUsuario);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM MensajeDirecto m WHERE m.conversacion.idConversacion = :idConv")
+    void deleteByConversacionIdConversacion(@Param("idConv") Integer idConversacion);
 }

@@ -94,6 +94,16 @@ public class ConversacionController {
         return ResponseEntity.ok(mensajeDirectoRepository.save(msg));
     }
 
+    @Operation(summary = "Eliminar conversación y todos sus mensajes")
+    @DeleteMapping("/{id}")
+    @Transactional
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        if (!conversacionRepository.existsById(id)) return ResponseEntity.notFound().build();
+        mensajeDirectoRepository.deleteByConversacionIdConversacion(id);
+        conversacionRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @Operation(summary = "Contar mensajes no leídos del usuario en todas sus conversaciones")
     @GetMapping("/no-leidos/{idUsuario}")
     public ResponseEntity<Map<String, Long>> countNoLeidos(@PathVariable Integer idUsuario) {
