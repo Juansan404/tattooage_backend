@@ -214,4 +214,102 @@ public class PublicacionController {
     public ResponseEntity<List<Publicacion>> getGuardadas(@PathVariable Integer idUsuario) {
         return ResponseEntity.ok(guardadaRepository.findPublicacionesByUsuarioId(idUsuario));
     }
+
+    @Operation(summary = "Publicaciones pendientes de revisión por el administrador")
+    @GetMapping("/pendientes-revision")
+    public ResponseEntity<List<Publicacion>> getPendientesRevision() {
+        return ResponseEntity.ok(publicacionRepository.findByPendienteVerificacionTrueOrderByCreadoEnDesc());
+    }
+
+    @Operation(summary = "Solicitar revisión de moderación",
+               description = "ML Kit marcó la imagen como dudosa. Notifica al autor y a todos los admins.")
+    @PostMapping("/{id}/solicitar-verificacion")
+    @Transactional
+    public ResponseEntity<Void> solicitarVerificacion(
+            @PathVariable Integer id,
+            @RequestBody Map<String, Integer> body) {
+
+        Integer idUsuario = body.get("idUsuario");
+        Publicacion pub = publicacionRepository.findById(id).orElse(null);
+        if (pub == null) return ResponseEntity.notFound().build();
+
+        pub.setPendienteVerificacion(true);
+        publicacionRepository.save(pub);
+
+        Usuario publisher = idUsuario != null ? usuarioRepository.findById(idUsuario).orElse(null) : pub.getUsuario();
+
+        // Notificar al autor
+        if (publisher != null) {
+            notificacionRepository.save(Notificacion.builder()
+                    .receptor(publisher)
+                    .emisor(publisher)
+                    .tipo(Notificacion.TipoNotificacion.VERIFICACION)
+                    .idReferencia(id)
+                    .build());
+        }
+
+        // Notificar a todos los admins activos
+        final Usuario finalPublisher = publisher;
+        usuarioRepository.findByRolAndActivoTrue(Usuario.RolUsuario.ADMIN).forEach(admin -> {
+            if (finalPublisher == null || !admin.getIdUsuario().equals(finalPublisher.getIdUsuario())) {
+                notificacionRepository.save(Notificacion.builder()
+                        .receptor(admin)
+                        .emisor(finalPublisher != null ? finalPublisher : admin)
+                        .tipo(Notificacion.TipoNotificacion.REVISION_ADMIN)
+                        .idReferencia(id)
+                        .build());
+            }
+        });
+
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Decisión de revisión del administrador",
+               description = "mantener=true aprueba la imagen; mantener=false la elimina. Notifica al autor del resultado.")
+    @PostMapping("/{id}/revision-admin")
+    @Transactional
+    public ResponseEntity<Void> revisionAdmin(
+            @PathVariable Integer id,
+            @RequestBody Map<String, Object> body) {
+
+        Object mantenerObj = body.get("mantener");
+        if (!(mantenerObj instanceof Boolean)) return ResponseEntity.badRequest().build();
+        boolean mantener = (Boolean) mantenerObj;
+
+        Object idAdminObj = body.get("idAdmin");
+        if (!(idAdminObj instanceof Integer)) return ResponseEntity.badRequest().build();
+        Integer idAdmin = (Integer) idAdminObj;
+
+        Publicacion pub = publicacionRepository.findById(id).orElse(null);
+        if (pub == null) return ResponseEntity.notFound().build();
+
+        Usuario admin     = usuarioRepository.findById(idAdmin).orElse(null);
+        Usuario publisher = pub.getUsuario();
+
+        if (admin == null) return ResponseEntity.badRequest().build();
+
+        if (mantener) {
+            pub.setPendienteVerificacion(false);
+            publicacionRepository.save(pub);
+            if (publisher != null) {
+                notificacionRepository.save(Notificacion.builder()
+                        .receptor(publisher)
+                        .emisor(admin)
+                        .tipo(Notificacion.TipoNotificacion.APROBADA)
+                        .idReferencia(id)
+                        .build());
+            }
+        } else {
+            if (publisher != null) {
+                notificacionRepository.save(Notificacion.builder()
+                        .receptor(publisher)
+                        .emisor(admin)
+                        .tipo(Notificacion.TipoNotificacion.RECHAZADA)
+                        .idReferencia(id)
+                        .build());
+            }
+            publicacionRepository.deleteById(id);
+        }
+        return ResponseEntity.noContent().build();
+    }
 }

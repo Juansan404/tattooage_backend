@@ -49,6 +49,10 @@ public class Publicacion {
     private LocalDateTime actualizadoEn;
 
     @Builder.Default
+    @Column(name = "pendiente_verificacion")
+    private Boolean pendienteVerificacion = false;
+
+    @Builder.Default
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "publicacion_estilos",

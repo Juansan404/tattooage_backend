@@ -41,6 +41,6 @@ public class Notificacion {
     private LocalDateTime creadoEn;
 
     public enum TipoNotificacion {
-        LIKE, COMENTARIO, SEGUIDOR, SOLICITUD
+        LIKE, COMENTARIO, SEGUIDOR, SOLICITUD, VERIFICACION, REVISION_ADMIN, APROBADA, RECHAZADA
     }
 }
