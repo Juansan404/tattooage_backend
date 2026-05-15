@@ -19,3 +19,22 @@ CREATE TABLE IF NOT EXISTS artista_estilos (
     id_estilo INTEGER NOT NULL REFERENCES estilos(id_estilo)          ON DELETE CASCADE,
     PRIMARY KEY (id_perfil, id_estilo)
 );
+
+-- Seed: estilos comunes para que el catálogo no esté vacío desde el inicio
+INSERT INTO estilos (nombre) VALUES
+    ('blackwork'),
+    ('realismo'),
+    ('tradicional'),
+    ('neo-tradicional'),
+    ('acuarela'),
+    ('minimalista'),
+    ('geométrico'),
+    ('japonés'),
+    ('tribal'),
+    ('old school'),
+    ('lettering'),
+    ('biomecánico'),
+    ('trash polka'),
+    ('fineline'),
+    ('dotwork')
+ON CONFLICT (nombre) DO NOTHING;
