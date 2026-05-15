@@ -58,6 +58,15 @@ public class PublicacionController {
         return ResponseEntity.ok(resultado);
     }
 
+    @Operation(summary = "Publicaciones de un usuario concreto")
+    @GetMapping("/usuario/{idUsuario}")
+    public ResponseEntity<List<Publicacion>> getByUsuario(@PathVariable Integer idUsuario) {
+        List<Publicacion> lista = publicacionRepository
+                .findByUsuarioIdUsuarioOrderByCreadoEnDesc(idUsuario, PageRequest.of(0, 1000))
+                .getContent();
+        return ResponseEntity.ok(lista);
+    }
+
     @Operation(summary = "Número de publicaciones de un usuario")
     @GetMapping("/count/usuario/{idUsuario}")
     public ResponseEntity<Long> countByUsuario(@PathVariable Integer idUsuario) {
