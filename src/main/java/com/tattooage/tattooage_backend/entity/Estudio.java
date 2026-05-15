@@ -35,6 +35,15 @@ public class Estudio {
     @Column(columnDefinition = "TEXT")
     private String descripcion;
 
+    @Column(length = 200)
+    private String web;
+
+    @Column(length = 100)
+    private String instagram;
+
+    @Column(columnDefinition = "TEXT")
+    private String localizacion;
+
     @Column(name = "foto_portada")
     private String fotoPortada;
 

@@ -10,5 +10,4 @@ import java.util.Optional;
 public interface PerfilArtistaRepository extends JpaRepository<PerfilArtista, Integer> {
     Optional<PerfilArtista> findByUsuarioIdUsuario(Integer idUsuario);
     List<PerfilArtista> findByDisponibleTrue();
-    List<PerfilArtista> findByEmpresaIdEmpresa(Integer idEmpresa);
 }

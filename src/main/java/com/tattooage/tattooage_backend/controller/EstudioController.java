@@ -44,12 +44,15 @@ public class EstudioController {
     @PutMapping("/{id}")
     public ResponseEntity<Estudio> update(@PathVariable Integer id, @RequestBody Estudio datos) {
         return estudioRepository.findById(id).map(e -> {
-            if (datos.getNombre()      != null) e.setNombre(datos.getNombre());
-            if (datos.getDireccion()   != null) e.setDireccion(datos.getDireccion());
-            if (datos.getCiudad()      != null) e.setCiudad(datos.getCiudad());
-            if (datos.getTelefono()    != null) e.setTelefono(datos.getTelefono());
-            if (datos.getEmail()       != null) e.setEmail(datos.getEmail());
-            if (datos.getDescripcion() != null) e.setDescripcion(datos.getDescripcion());
+            if (datos.getNombre()       != null) e.setNombre(datos.getNombre());
+            if (datos.getDireccion()    != null) e.setDireccion(datos.getDireccion());
+            if (datos.getCiudad()       != null) e.setCiudad(datos.getCiudad());
+            if (datos.getTelefono()     != null) e.setTelefono(datos.getTelefono());
+            if (datos.getEmail()        != null) e.setEmail(datos.getEmail());
+            if (datos.getDescripcion()  != null) e.setDescripcion(datos.getDescripcion());
+            if (datos.getWeb()          != null) e.setWeb(datos.getWeb());
+            if (datos.getInstagram()    != null) e.setInstagram(datos.getInstagram());
+            if (datos.getLocalizacion() != null) e.setLocalizacion(datos.getLocalizacion());
             return ResponseEntity.ok(estudioRepository.save(e));
         }).orElse(ResponseEntity.notFound().build());
     }
