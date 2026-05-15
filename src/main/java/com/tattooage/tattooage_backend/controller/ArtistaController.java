@@ -1,7 +1,9 @@
 package com.tattooage.tattooage_backend.controller;
 
+import com.tattooage.tattooage_backend.entity.Empresa;
 import com.tattooage.tattooage_backend.entity.PerfilArtista;
 import com.tattooage.tattooage_backend.entity.Usuario;
+import com.tattooage.tattooage_backend.repository.EmpresaRepository;
 import com.tattooage.tattooage_backend.repository.PerfilArtistaRepository;
 import com.tattooage.tattooage_backend.repository.UsuarioRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,8 +23,9 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ArtistaController {
 
-    private final UsuarioRepository usuarioRepository;
+    private final UsuarioRepository       usuarioRepository;
     private final PerfilArtistaRepository perfilArtistaRepository;
+    private final EmpresaRepository       empresaRepository;
 
     @Operation(summary = "Listar artistas", description = "Devuelve todos los perfiles de artista.")
     @GetMapping
@@ -73,6 +76,15 @@ public class ArtistaController {
             if (datos.get("precioHora")      != null) p.setPrecioHora(new BigDecimal(datos.get("precioHora").toString()));
             if (datos.get("disponible")      != null) p.setDisponible(Boolean.valueOf(datos.get("disponible").toString()));
             if (datos.get("portfolioUrl")    != null) p.setPortfolioUrl(datos.get("portfolioUrl").toString());
+            if (datos.containsKey("idEmpresa")) {
+                Object v = datos.get("idEmpresa");
+                if (v == null) {
+                    p.setEmpresa(null);
+                } else {
+                    empresaRepository.findById(Integer.valueOf(v.toString()))
+                            .ifPresent(p::setEmpresa);
+                }
+            }
             return ResponseEntity.ok(perfilArtistaRepository.save(p));
         }).orElse(ResponseEntity.notFound().build());
     }

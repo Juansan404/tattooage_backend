@@ -28,6 +28,10 @@ public class PerfilArtista {
     @JoinColumn(name = "id_estudio")
     private Estudio estudio;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_empresa")
+    private Empresa empresa;
+
     @Column(columnDefinition = "TEXT")
     private String especialidades;
 
