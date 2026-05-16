@@ -80,23 +80,31 @@ public class ArtistaController {
     @PutMapping("/{id}/perfil")
     public ResponseEntity<PerfilArtista> updatePerfil(@PathVariable Integer id,
                                                        @RequestBody Map<String, Object> datos) {
-        return perfilArtistaRepository.findByUsuarioIdUsuario(id).map(p -> {
-            if (datos.get("especialidades") != null) p.setEspecialidades(datos.get("especialidades").toString());
-            if (datos.get("anosExperiencia") != null) p.setAnosExperiencia(Integer.valueOf(datos.get("anosExperiencia").toString()));
-            if (datos.get("instagram")       != null) p.setInstagram(datos.get("instagram").toString());
-            if (datos.get("precioHora")      != null) p.setPrecioHora(new BigDecimal(datos.get("precioHora").toString()));
-            if (datos.get("disponible")      != null) p.setDisponible(Boolean.valueOf(datos.get("disponible").toString()));
-            if (datos.get("portfolioUrl")    != null) p.setPortfolioUrl(datos.get("portfolioUrl").toString());
-            if (datos.containsKey("idEstudio")) {
-                Object idEst = datos.get("idEstudio");
-                if (idEst == null) {
-                    p.setEstudio(null);
-                } else {
-                    estudioRepository.findById(Integer.valueOf(idEst.toString())).ifPresent(p::setEstudio);
-                }
+        PerfilArtista perfil = perfilArtistaRepository.findByUsuarioIdUsuario(id)
+                .orElseGet(() -> {
+                    Usuario u = usuarioRepository.findById(id).orElse(null);
+                    if (u == null) return null;
+                    PerfilArtista p = new PerfilArtista();
+                    p.setUsuario(u);
+                    p.setDisponible(false);
+                    return perfilArtistaRepository.save(p);
+                });
+        if (perfil == null) return ResponseEntity.notFound().build();
+        if (datos.get("especialidades") != null) perfil.setEspecialidades(datos.get("especialidades").toString());
+        if (datos.get("anosExperiencia") != null) perfil.setAnosExperiencia(Integer.valueOf(datos.get("anosExperiencia").toString()));
+        if (datos.get("instagram")       != null) perfil.setInstagram(datos.get("instagram").toString());
+        if (datos.get("precioHora")      != null) perfil.setPrecioHora(new BigDecimal(datos.get("precioHora").toString()));
+        if (datos.get("disponible")      != null) perfil.setDisponible(Boolean.valueOf(datos.get("disponible").toString()));
+        if (datos.get("portfolioUrl")    != null) perfil.setPortfolioUrl(datos.get("portfolioUrl").toString());
+        if (datos.containsKey("idEstudio")) {
+            Object idEst = datos.get("idEstudio");
+            if (idEst == null) {
+                perfil.setEstudio(null);
+            } else {
+                estudioRepository.findById(Integer.valueOf(idEst.toString())).ifPresent(perfil::setEstudio);
             }
-            PerfilArtista saved = perfilArtistaRepository.save(p);
-            return ResponseEntity.ok(perfilArtistaRepository.findById(saved.getIdPerfil()).orElse(saved));
-        }).orElse(ResponseEntity.notFound().build());
+        }
+        PerfilArtista saved = perfilArtistaRepository.save(perfil);
+        return ResponseEntity.ok(perfilArtistaRepository.findById(saved.getIdPerfil()).orElse(saved));
     }
 }
