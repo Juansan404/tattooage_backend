@@ -1,7 +1,9 @@
 package com.tattooage.tattooage_backend.controller;
 
+import com.tattooage.tattooage_backend.entity.Estudio;
 import com.tattooage.tattooage_backend.entity.PerfilArtista;
 import com.tattooage.tattooage_backend.entity.Usuario;
+import com.tattooage.tattooage_backend.repository.EstudioRepository;
 import com.tattooage.tattooage_backend.repository.PerfilArtistaRepository;
 import com.tattooage.tattooage_backend.repository.UsuarioRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,6 +25,7 @@ public class ArtistaController {
 
     private final UsuarioRepository       usuarioRepository;
     private final PerfilArtistaRepository perfilArtistaRepository;
+    private final EstudioRepository       estudioRepository;
 
     @Operation(summary = "Listar artistas", description = "Devuelve todos los usuarios con rol ARTISTA y estado ACTIVO, con su perfil embebido si existe.")
     @GetMapping
@@ -84,7 +87,16 @@ public class ArtistaController {
             if (datos.get("precioHora")      != null) p.setPrecioHora(new BigDecimal(datos.get("precioHora").toString()));
             if (datos.get("disponible")      != null) p.setDisponible(Boolean.valueOf(datos.get("disponible").toString()));
             if (datos.get("portfolioUrl")    != null) p.setPortfolioUrl(datos.get("portfolioUrl").toString());
-            return ResponseEntity.ok(perfilArtistaRepository.save(p));
+            if (datos.containsKey("idEstudio")) {
+                Object idEst = datos.get("idEstudio");
+                if (idEst == null) {
+                    p.setEstudio(null);
+                } else {
+                    estudioRepository.findById(Integer.valueOf(idEst.toString())).ifPresent(p::setEstudio);
+                }
+            }
+            PerfilArtista saved = perfilArtistaRepository.save(p);
+            return ResponseEntity.ok(perfilArtistaRepository.findById(saved.getIdPerfil()).orElse(saved));
         }).orElse(ResponseEntity.notFound().build());
     }
 }
