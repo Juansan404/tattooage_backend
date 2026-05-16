@@ -68,7 +68,8 @@ public class ComentarioController {
                 }
             });
         } catch (Exception ignored) {}
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+        Comentario response = comentarioRepository.findById(saved.getIdComentario()).orElse(saved);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Operation(summary = "Eliminar comentario")

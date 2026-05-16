@@ -67,13 +67,14 @@ public class ValoracionController {
                 .findByArtistaIdUsuarioAndClienteIdUsuario(idArtista, idCliente)
                 .orElse(new Valoracion());
 
-        val.setArtista(usuarioRepository.getReferenceById(idArtista));
-        val.setCliente(usuarioRepository.getReferenceById(idCliente));
+        val.setArtista(usuarioRepository.findById(idArtista).orElseThrow());
+        val.setCliente(usuarioRepository.findById(idCliente).orElseThrow());
         val.setPuntuacion(puntuacion);
         val.setComentario(comentario);
 
         Valoracion saved = valoracionRepository.save(val);
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(valoracionRepository.findById(saved.getIdValoracion()).orElse(saved));
     }
 
     @Operation(summary = "Eliminar valoración propia")
