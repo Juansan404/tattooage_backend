@@ -38,7 +38,7 @@ public class AuthService {
         usuarioRepository.save(usuario);
 
         String token = jwtUtil.generarToken(usuario.getEmail(), usuario.getRol().name());
-        return new AuthResponse(token, usuario.getIdUsuario(), usuario.getEmail(), usuario.getRol().name());
+        return new AuthResponse(token, usuario.getIdUsuario(), usuario.getEmail(), usuario.getRol().name(), usuario.getEstadoRegistro().name());
     }
 
     public AuthResponse login(AuthRequest request) {
@@ -48,6 +48,6 @@ public class AuthService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales incorrectas"));
 
         String token = jwtUtil.generarToken(usuario.getEmail(), usuario.getRol().name());
-        return new AuthResponse(token, usuario.getIdUsuario(), usuario.getEmail(), usuario.getRol().name());
+        return new AuthResponse(token, usuario.getIdUsuario(), usuario.getEmail(), usuario.getRol().name(), usuario.getEstadoRegistro().name());
     }
 }
