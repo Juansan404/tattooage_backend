@@ -31,6 +31,48 @@ public class EmailService {
         mailSender.send(msg);
     }
 
+    public void sendArtistPendingAdmin(String artistEmail, String nombre) {
+        SimpleMailMessage msg = new SimpleMailMessage();
+        msg.setFrom(from);
+        msg.setTo(from);
+        msg.setSubject("TattooAge – Nueva solicitud de registro como artista");
+        msg.setText(
+            "Hola,\n\n" +
+            "El usuario " + nombre + " (" + artistEmail + ") ha solicitado registrarse como artista.\n\n" +
+            "Accede a la aplicación de escritorio para aprobar o rechazar la solicitud.\n\n" +
+            "— Sistema TattooAge"
+        );
+        mailSender.send(msg);
+    }
+
+    public void sendArtistApproved(String artistEmail, String nombre) {
+        SimpleMailMessage msg = new SimpleMailMessage();
+        msg.setFrom(from);
+        msg.setTo(artistEmail);
+        msg.setSubject("TattooAge – ¡Tu cuenta de artista ha sido aprobada!");
+        msg.setText(
+            "Hola " + nombre + ",\n\n" +
+            "¡Enhorabuena! Tu solicitud para unirte a TattooAge como artista ha sido aprobada.\n\n" +
+            "Ya puedes iniciar sesión y comenzar a compartir tu trabajo.\n\n" +
+            "— El equipo de TattooAge"
+        );
+        mailSender.send(msg);
+    }
+
+    public void sendArtistRejected(String artistEmail, String nombre) {
+        SimpleMailMessage msg = new SimpleMailMessage();
+        msg.setFrom(from);
+        msg.setTo(artistEmail);
+        msg.setSubject("TattooAge – Solicitud de registro no aprobada");
+        msg.setText(
+            "Hola " + nombre + ",\n\n" +
+            "Lamentamos informarte de que tu solicitud para unirte a TattooAge como artista no ha sido aprobada en este momento.\n\n" +
+            "Si crees que es un error, puedes ponerte en contacto con nosotros.\n\n" +
+            "— El equipo de TattooAge"
+        );
+        mailSender.send(msg);
+    }
+
     public void sendAdminNotification(String userEmail) {
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setFrom(from);

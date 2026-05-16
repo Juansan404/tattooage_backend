@@ -56,6 +56,11 @@ public class Usuario {
     @Column(nullable = false)
     private Boolean activo = true;
 
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(name = "estado_registro", nullable = false, length = 20)
+    private EstadoRegistro estadoRegistro = EstadoRegistro.ACTIVO;
+
     @CreationTimestamp
     @Column(name = "creado_en", updatable = false)
     private LocalDateTime creadoEn;
@@ -66,5 +71,9 @@ public class Usuario {
 
     public enum RolUsuario {
         CLIENTE, ARTISTA, ADMIN
+    }
+
+    public enum EstadoRegistro {
+        PENDIENTE, ACTIVO, RECHAZADO
     }
 }
