@@ -1,7 +1,9 @@
 package com.tattooage.tattooage_backend.controller;
 
 import com.tattooage.tattooage_backend.entity.Estudio;
+import com.tattooage.tattooage_backend.entity.PerfilArtista;
 import com.tattooage.tattooage_backend.repository.EstudioRepository;
+import com.tattooage.tattooage_backend.repository.PerfilArtistaRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import java.util.List;
 public class EstudioController {
 
     private final EstudioRepository estudioRepository;
+    private final PerfilArtistaRepository perfilArtistaRepository;
 
     @Operation(summary = "Listar estudios")
     @GetMapping
@@ -55,6 +58,12 @@ public class EstudioController {
             if (datos.getLocalizacion() != null) e.setLocalizacion(datos.getLocalizacion());
             return ResponseEntity.ok(estudioRepository.save(e));
         }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @Operation(summary = "Artistas de un estudio")
+    @GetMapping("/{id}/artistas")
+    public ResponseEntity<List<PerfilArtista>> getArtistas(@PathVariable Integer id) {
+        return ResponseEntity.ok(perfilArtistaRepository.findByEstudioIdEstudio(id));
     }
 
     @Operation(summary = "Eliminar estudio")
