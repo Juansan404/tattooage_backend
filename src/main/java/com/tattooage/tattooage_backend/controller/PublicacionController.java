@@ -6,6 +6,7 @@ import com.tattooage.tattooage_backend.entity.Notificacion;
 import com.tattooage.tattooage_backend.entity.Publicacion;
 import com.tattooage.tattooage_backend.entity.PublicacionGuardada;
 import com.tattooage.tattooage_backend.entity.Usuario;
+import com.tattooage.tattooage_backend.repository.ComentarioRepository;
 import com.tattooage.tattooage_backend.repository.EstiloRepository;
 import com.tattooage.tattooage_backend.repository.LikeRepository;
 import com.tattooage.tattooage_backend.repository.NotificacionRepository;
@@ -36,6 +37,7 @@ public class PublicacionController {
 
     private final PublicacionRepository publicacionRepository;
     private final LikeRepository likeRepository;
+    private final ComentarioRepository comentarioRepository;
     private final PublicacionGuardadaRepository guardadaRepository;
     private final UsuarioRepository usuarioRepository;
     private final NotificacionRepository notificacionRepository;
@@ -126,12 +128,17 @@ public class PublicacionController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
-    @Operation(summary = "Eliminar publicación", description = "Elimina una publicación por ID. Requiere autenticación.")
+    @Operation(summary = "Eliminar publicación", description = "Elimina una publicación y todos sus datos relacionados.")
     @DeleteMapping("/{id}")
+    @Transactional
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         if (!publicacionRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
+        likeRepository.deleteByPublicacionIdPublicacion(id);
+        comentarioRepository.deleteByPublicacionIdPublicacion(id);
+        guardadaRepository.deleteByPublicacionIdPublicacion(id);
+        notificacionRepository.deleteByIdReferencia(id);
         publicacionRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }

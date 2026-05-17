@@ -3,6 +3,7 @@ package com.tattooage.tattooage_backend.repository;
 import com.tattooage.tattooage_backend.entity.Comentario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -10,4 +11,7 @@ import java.util.List;
 public interface ComentarioRepository extends JpaRepository<Comentario, Integer> {
     List<Comentario> findByPublicacionIdPublicacion(Integer idPublicacion);
     long countByPublicacionIdPublicacion(Integer idPublicacion);
+
+    @Transactional
+    void deleteByPublicacionIdPublicacion(Integer idPublicacion);
 }

@@ -17,4 +17,8 @@ public interface NotificacionRepository extends JpaRepository<Notificacion, Inte
     @Modifying
     @Query("UPDATE Notificacion n SET n.leida = true WHERE n.receptor.idUsuario = :idUsuario")
     void marcarTodasLeidas(@Param("idUsuario") Integer idUsuario);
+
+    @Modifying
+    @Query("DELETE FROM Notificacion n WHERE n.idReferencia = :idReferencia")
+    void deleteByIdReferencia(@Param("idReferencia") Integer idReferencia);
 }
