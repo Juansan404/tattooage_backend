@@ -13,6 +13,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
 
@@ -91,7 +95,36 @@ public class ConversacionController {
         Usuario remitente = usuarioRepository.findById(idRemitente).orElseThrow();
         MensajeDirecto msg = MensajeDirecto.builder()
                 .conversacion(conv).remitente(remitente).contenido(contenido).build();
-        return ResponseEntity.ok(mensajeDirectoRepository.save(msg));
+        MensajeDirecto saved = mensajeDirectoRepository.save(msg);
+
+        // Enviar push notification al destinatario
+        Usuario destinatario = conv.getUsuario1().getIdUsuario().equals(idRemitente)
+                ? conv.getUsuario2() : conv.getUsuario1();
+        if (destinatario.getPushToken() != null && !destinatario.getPushToken().isBlank()) {
+            String nombreRemitente = remitente.getNombre();
+            String preview = contenido.length() > 100 ? contenido.substring(0, 100) + "…" : contenido;
+            enviarPushNotification(destinatario.getPushToken(), nombreRemitente, preview, id);
+        }
+
+        return ResponseEntity.ok(saved);
+    }
+
+    private void enviarPushNotification(String token, String titulo, String cuerpo, Integer idConversacion) {
+        try {
+            String json = String.format(
+                "{\"to\":\"%s\",\"title\":\"%s\",\"body\":\"%s\",\"data\":{\"tipo\":\"mensaje\",\"idConversacion\":%d},\"channelId\":\"mensajes\"}",
+                token,
+                titulo.replace("\"", "\\\""),
+                cuerpo.replace("\"", "\\\""),
+                idConversacion
+            );
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://exp.host/--/api/v2/push/send"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .build();
+            HttpClient.newHttpClient().sendAsync(request, HttpResponse.BodyHandlers.discarding());
+        } catch (Exception ignored) {}
     }
 
     @Operation(summary = "Eliminar conversación y todos sus mensajes")

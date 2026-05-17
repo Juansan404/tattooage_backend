@@ -61,6 +61,9 @@ public class Usuario {
     @Column(name = "estado_registro", nullable = false, length = 20)
     private EstadoRegistro estadoRegistro = EstadoRegistro.ACTIVO;
 
+    @Column(name = "push_token", length = 200)
+    private String pushToken;
+
     @CreationTimestamp
     @Column(name = "creado_en", updatable = false)
     private LocalDateTime creadoEn;

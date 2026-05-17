@@ -60,4 +60,16 @@ public class UsuarioController {
         usuarioRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+
+    @Operation(summary = "Actualizar push token del usuario")
+    @PutMapping("/{id}/push-token")
+    public ResponseEntity<Void> updatePushToken(
+            @PathVariable Integer id,
+            @RequestBody java.util.Map<String, String> body) {
+        return usuarioRepository.findById(id).map(u -> {
+            u.setPushToken(body.get("pushToken"));
+            usuarioRepository.save(u);
+            return ResponseEntity.ok().<Void>build();
+        }).orElse(ResponseEntity.notFound().build());
+    }
 }
